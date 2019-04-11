@@ -55,7 +55,7 @@ def webhook():
     elif data["result"]["action"] == "input.unknown":
         ref = db.reference('question')
         ref.push({
-            'question': data['originalRequest']['data']['data']['message']['text'],
+            'question': data['originalRequest']['data']['message']['text'],
         })
         return '', 200
 
