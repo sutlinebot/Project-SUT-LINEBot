@@ -32,7 +32,7 @@ base_response = {
 @app.route('/webhook', methods=['GET', 'POST'])
 def webhook():
     data = request.get_json(silent=True)
-    # pprint(data)
+    pprint(data)
     if data["result"]["action"] == "BMI.BMI-custom.BMI-calculate-custom":
         w = int(data['result']['parameters']['weight'])
         h = int(data['result']['parameters']['height']) / 100
@@ -53,9 +53,13 @@ def webhook():
         }
         return jsonify(reply)
     elif data["result"]["action"] == "input.unknown":
+        if data['originalRequest']['data'] != {}:
+            msg = data['originalRequest']['data']['message']['text']
+        elif data['result']['resolvedQuery'] != "":
+            msg = data['result']['resolvedQuery']
         ref = db.reference('question')
         ref.push({
-            'question': data['originalRequest']['data']['message']['text'],
+            'question': msg,
         })
         return '', 200
 
