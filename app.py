@@ -53,14 +53,35 @@ def webhook():
         }
         return jsonify(reply)
     elif data["result"]["action"] == "input.unknown":
-        if data['originalRequest']['data'] != {}:
-            msg = data['originalRequest']['data']['message']['text']
-        elif data['result']['resolvedQuery'] != "":
+        # if data['originalRequest']['data'] != {}:
+        #     msg = data['originalRequest']['data']['message']['text']
+        if data['result']['resolvedQuery'] != "":
             msg = data['result']['resolvedQuery']
         ref = db.reference('question')
         ref.push({
             'question': msg,
         })
+        return '', 200
+    elif data["result"]["action"] == '':
+        name = data["result"]["metadata"]["intentName"]
+        ref = db.reference('/intentCount/' + name)
+        if ref.get() is None:
+            ref.push({
+                'success': 1,
+                'fail': 0
+            });
+        else:
+            updateref = db.reference('/intentCount/'+name)
+            temp = updateref.get()
+
+            for key, val in temp.items():
+                keyid = key
+                successcount = val["success"]
+
+            ref.update({
+                keyid+'/success': successcount+1
+            })
+
         return '', 200
 
 # https://sut-line-bot.herokuapp.com/webhook
