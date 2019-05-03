@@ -88,7 +88,7 @@ def webhook():
 
 
 @app.route('/countfail', methods=['GET', 'POST', 'OPTION'])
-def angularPost():
+def countFail():
     data = request.get_json(silent=True)
     name = data["name"];
     ref = db.reference('/intentCount/' + name)
@@ -109,6 +109,39 @@ def angularPost():
             keyid + '/fail': failcount+1
         })
     return jsonify(data)
+
+
+@app.route('/getcount', methods=['GET', 'OPTION'])
+def getcount():
+    # data = request.get_json(silent=True)
+    # name = data["name"];
+    ref = db.reference('/intentCount/')
+    print(type(ref.get().items()))
+    labels = []
+    success = []
+    fail = []
+    sumsuccess = 0
+    sumfail = 0
+    for item in ref.get().items():
+        # temp = dict(item)
+        for i in item:
+            if type(i) is not str:
+                t = dict(i).items()
+                for key, val in t:
+                    success.append(val["success"])
+                    fail.append(val["fail"])
+                    sumfail += val["fail"]
+                    sumsuccess += val["success"]
+            else:
+                labels.append(i)
+    reply = {
+        'Labels': labels,
+        'success': success,
+        'fail': fail,
+        'sumsuccess': sumsuccess,
+        'sumfail': sumfail,
+    }
+    return jsonify(reply)
 
 
 # https://sut-line-bot.herokuapp.com/webhook
