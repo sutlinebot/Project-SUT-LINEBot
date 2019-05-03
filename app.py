@@ -1,4 +1,5 @@
 from flask import Flask, request, abort, jsonify
+from flask_cors import CORS
 import firebase_admin
 from firebase_admin import credentials, db
 from pprint import pprint
@@ -18,6 +19,7 @@ firebase_admin.initialize_app(cred, {
 # db = firestore.client()
 
 app = Flask(__name__)
+CORS(app)
 
 base_response = {
     'speech': "sample response",
@@ -71,7 +73,7 @@ def webhook():
                 'fail': 0
             });
         else:
-            updateref = db.reference('/intentCount/'+name)
+            updateref = db.reference('/intentCount/' + name)
             temp = updateref.get()
 
             for key, val in temp.items():
@@ -79,10 +81,35 @@ def webhook():
                 successcount = val["success"]
 
             ref.update({
-                keyid+'/success': successcount+1
+                keyid + '/success': successcount + 1
             })
 
         return '', 200
+
+
+@app.route('/countfail', methods=['GET', 'POST', 'OPTION'])
+def angularPost():
+    data = request.get_json(silent=True)
+    name = data["name"];
+    ref = db.reference('/intentCount/' + name)
+    if ref.get() is None:
+        ref.push({
+            'success': 0,
+            'fail': 1
+        });
+    else:
+        updateref = db.reference('/intentCount/' + name)
+        temp = updateref.get()
+
+        for key, val in temp.items():
+            keyid = key
+            failcount = val["fail"]
+
+        ref.update({
+            keyid + '/fail': failcount+1
+        })
+    return jsonify(data)
+
 
 # https://sut-line-bot.herokuapp.com/webhook
 if __name__ == '__main__':
