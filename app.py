@@ -3,6 +3,7 @@ from flask_cors import CORS
 import firebase_admin
 from firebase_admin import credentials, db
 from pprint import pprint
+import datetime
 
 # Fetch the service account key JSON file contents
 cred = credentials.Certificate('botframe-2d07e-firebase-adminsdk-gt6r2-644290ce5e.json')
@@ -60,8 +61,14 @@ def webhook():
         if data['result']['resolvedQuery'] != "":
             msg = data['result']['resolvedQuery']
         ref = db.reference('question')
+        date = datetime.datetime.now().date()
+        currenttime = datetime.datetime.now().time().replace(datetime.datetime.now().time().hour, datetime.datetime.now().time().minute, datetime.datetime.now().time().second, microsecond=0)
+        print('currenttime: ', currenttime)
+        print('date: ', date)
         ref.push({
             'question': msg,
+            'date': str(date),
+            'time': str(currenttime),
         })
         return '', 200
     elif data["result"]["action"] == '':
