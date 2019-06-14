@@ -1,4 +1,4 @@
-from flask import Flask, request, abort, jsonify
+from flask import Flask, request,  jsonify
 from flask_cors import CORS
 import firebase_admin
 from firebase_admin import credentials, db
@@ -36,26 +36,7 @@ base_response = {
 def webhook():
     data = request.get_json(silent=True)
     pprint(data)
-    if data["result"]["action"] == "BMI.BMI-custom.BMI-calculate-custom":
-        w = int(data['result']['parameters']['weight'])
-        h = int(data['result']['parameters']['height']) / 100
-        bmi = (w / (h * h))
-        print(bmi)
-        if bmi < 18.5:
-            result = 'คุณผอมไป กินข้าวเยอะๆ'
-        elif 18.5 <= bmi <= 22.9:
-            result = 'คุณหุ่นดีสุดๆเลย'
-        elif 23 <= bmi <= 24.9:
-            result = 'คุณเริ่มอ้วนแล้วนะ'
-        elif 25 <= bmi <= 29.9:
-            result = 'คุณอ้วนแล้ว ออกกำลังกายด่วน'
-        else:
-            result = 'คุณอ้วนมากแล้วอันตราย หาหมอด่วนควย'
-        reply = {
-            'speech': result,
-        }
-        return jsonify(reply)
-    elif data["result"]["action"] == "input.unknown":
+    if data["result"]["action"] == "input.unknown":
         # if data['originalRequest']['data'] != {}:
         #     msg = data['originalRequest']['data']['message']['text']
         if data['result']['resolvedQuery'] != "":
@@ -153,4 +134,4 @@ def getcount():
 
 # https://sut-line-bot.herokuapp.com/webhook
 if __name__ == '__main__':
-    app.run()
+    app.run(host='0.0.0.0', port=4000)
